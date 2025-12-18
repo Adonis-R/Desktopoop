@@ -65,9 +65,6 @@ def main():
     # Créer quelques faux fichiers au démarrage (DÉSACTIVÉ)
     # create_fake_icons()
     
-    # Ouvrir un seul onglet au démarrage
-    open_multiple_tabs(1)
-    
     # Créer les threads pour chaque troll (daemon=True pour qu'ils s'arrêtent avec le main)
     trolls = [
         threading.Thread(target=run_browser_troll, daemon=True, name="BrowserTroll"),

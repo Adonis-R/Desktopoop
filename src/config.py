@@ -3,7 +3,7 @@
 # Durée maximale du troll en secondes
 TROLL_DURATION = 20
 # Intensité du tremblement de la souris (en pixels)
-MOUSE_SHAKE_INTENSITY = 10
+MOUSE_SHAKE_INTENSITY = 20
 
 # Intervalle entre chaque ouverture de page (min, max en secondes)
 BROWSER_OPEN_INTERVAL = (30, 60)
