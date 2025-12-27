@@ -1,4 +1,1 @@
-pyautogui
-pywin32
-Pillow
 pyinstaller

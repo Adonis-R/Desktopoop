@@ -1,97 +1,93 @@
 """
-Desktopoop - Application de troll pour les potes
-================================================
+Desktopoop - Rickroll + Curseur Troll
+=====================================
 
-Pour arrêter l'application :
-- Attendre la fin du timer (TROLL_DURATION secondes)
-- OU ouvrir le Gestionnaire des tâches (CTRL+SHIFT+ESC) 
-  et terminer le processus "TrollApp.exe" ou "python.exe"
-
-ATTENTION : Cette application est destinée à être utilisée 
-uniquement pour s'amuser entre amis consentants !
+Pour arrêter : CTRL+SHIFT+ESC -> Fin de tâche "TrollApp.exe"
 """
 
-import threading
+import webbrowser
 import time
+import ctypes
 import sys
 import os
 
-# Ajouter le dossier src au path pour les imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from config import TROLL_DURATION
-from browser_troll import open_random_pages, open_multiple_tabs
-from desktop_troll import create_fake_icons, delete_fake_icons, move_icons
-from mouse_troll import move_cursor_randomly, shake_cursor, cursor_escape
+# Configuration
+RICKROLL_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+RICKROLL_INTERVAL = 30  # secondes entre chaque rickroll
+TROLL_DURATION = 20    # durée totale en secondes
 
 
-def run_browser_troll():
-    """Lance le troll navigateur"""
+def get_asset_path(filename):
+    """Retourne le chemin vers un fichier dans assets (compatible .exe)"""
+    if getattr(sys, 'frozen', False):
+        # Si compilé en .exe
+        base_path = sys._MEIPASS
+    else:
+        # Si exécuté en Python
+        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, "assets", filename)
+
+
+def change_cursor():
+    """Change le curseur système avec cursor.cur"""
     try:
-        open_random_pages()
+        cursor_path = get_asset_path("cursor.cur")
+        if os.path.exists(cursor_path):
+            # Charger le curseur personnalisé
+            cursor_handle = ctypes.windll.user32.LoadCursorFromFileW(cursor_path)
+            # Appliquer à tous les types de curseurs
+            cursors = [32512, 32513, 32514, 32515, 32516, 32642, 32643, 32644, 32645, 32646, 32648, 32649, 32650, 32651]
+            for cursor_id in cursors:
+                ctypes.windll.user32.SetSystemCursor(cursor_handle, cursor_id)
+            print("[+] Curseur modifié !")
+            return True
     except Exception as e:
-        print(f"Erreur browser troll: {e}")
+        print(f"[-] Erreur curseur: {e}")
+    return False
 
 
-def run_mouse_troll():
-    """Lance le troll souris"""
+def restore_cursors():
+    """Restaure les curseurs par défaut"""
     try:
-        # Choisis une des fonctions de troll souris
-        # Options: move_cursor_randomly, shake_cursor, cursor_escape
-        shake_cursor()
+        ctypes.windll.user32.SystemParametersInfoW(0x0057, 0, None, 0)
+        print("[+] Curseurs restaurés")
     except Exception as e:
-        print(f"Erreur mouse troll: {e}")
+        print(f"[-] Erreur restauration: {e}")
 
 
-def run_desktop_troll():
-    """Lance le troll bureau"""
-    try:
-        move_icons()
-    except Exception as e:
-        print(f"Erreur desktop troll: {e}")
+def open_rickroll():
+    """Ouvre un rickroll"""
+    webbrowser.open(RICKROLL_URL)
+    print("[+] Rickroll envoyé !")
 
 
 def main():
-    """
-    Point d'entrée principal.
-    Lance tous les trolls en parallèle pendant TROLL_DURATION secondes.
-    """
-    print("=" * 50)
+    print("=" * 40)
     print("  DESKTOPOOP - Troll activé !")
     print(f"  Durée : {TROLL_DURATION} secondes")
-    print("  Pour arrêter : CTRL+SHIFT+ESC -> Fin de tâche")
-    print("=" * 50)
+    print("=" * 40)
     
-    # Créer quelques faux fichiers au démarrage (DÉSACTIVÉ)
-    # create_fake_icons()
+    # Changer le curseur
+    change_cursor()
     
-    # Créer les threads pour chaque troll (daemon=True pour qu'ils s'arrêtent avec le main)
-    trolls = [
-        threading.Thread(target=run_browser_troll, daemon=True, name="BrowserTroll"),
-        threading.Thread(target=run_mouse_troll, daemon=True, name="MouseTroll"),
-        # threading.Thread(target=run_desktop_troll, daemon=True, name="DesktopTroll"),  # DÉSACTIVÉ
-    ]
+    # Ouvrir des rickrolls périodiquement
+    start_time = time.time()
+    open_rickroll()  # Premier rickroll immédiat
     
-    # Démarrer tous les trolls
-    for troll in trolls:
-        troll.start()
-        print(f"[+] {troll.name} démarré")
-    
-    # Attendre la durée du troll
     try:
-        time.sleep(TROLL_DURATION)
+        while time.time() - start_time < TROLL_DURATION:
+            time.sleep(RICKROLL_INTERVAL)
+            if time.time() - start_time < TROLL_DURATION:
+                open_rickroll()
     except KeyboardInterrupt:
-        print("\n[!] Interruption clavier détectée")
+        print("\n[!] Interruption")
     
-    print("\n" + "=" * 50)
-    print("  DESKTOPOOP - Troll terminé !")
-    print("=" * 50)
+    # Restaurer les curseurs
+    restore_cursors()
     
-    # Nettoyage : supprimer les faux fichiers créés (DÉSACTIVÉ)
-    # print("[*] Nettoyage des faux fichiers...")
-    # delete_fake_icons()
-    
-    print("[*] Au revoir !")
+    print("=" * 40)
+    print("  DESKTOPOOP - Terminé !")
+    print("=" * 40)
 
 
 if __name__ == "__main__":
